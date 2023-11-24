@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purwarupa</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <style>
+      .hidden {
+        display: none;
+      }
+      #gambarPopup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+      }
+
+      #gambarPopup img {
+        display: block;
+        margin: auto;
+        margin-top: 5%;
+        max-width: 80%;
+        max-height: 80%;
+      }
+
+      .tutupPopup {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 24px;
+        color: white;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h3 class="my-5 text-center">
+        <strong
+          >Purwarupa Penilaian Risiko Kerja Individu <br />
+          Menggunakan Persamaan RevisedNIOSH Lifting Equation yang Adaptif
+          <br />
+          Berbasis Pengolahan Citra Digital
+        </strong>
+      </h3>
+      <hr />
+      <form action="/hitung" method="post">
+        <div class="row">
+          <div class="col-6">
+            <div class="mb-3">
+              <label for="beban" class="form-label">Citra Latar</label>
+              <input
+                class="form-control"
+                type="file"
+                id="formFile"
+                name="latar"
+                required
+              />
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="mb-3">
+              <label for="beban" class="form-label">Citra Individu</label>
+              <input
+                class="form-control"
+                type="file"
+                id="formFile"
+                name="individu"
+                required
+              />
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="beban" class="form-label">Beban (kg):</label>
+          {% if hasil %}
+          <input
+            type="number"
+            class="form-control"
+            name="beban"
+            min="0"
+            value="{{ hasil.Beban }}"
+            readonly
+          />
+          {% else %}
+          <input
+            type="number"
+            class="form-control"
+            name="beban"
+            min="0"
+            required
+          />
+          {% endif %}
+        </div>
+
+        <div class="row">
+          <div class="mb-3 col-6">
+            <label for="horizontal_ambil" class="form-label"
+              >Horizontal Ambil:</label
+            >
+            {% if hasil %}
+            <input
+              type="number"
+              class="form-control"
+              name="horizontal_ambil"
+              min="0"
+              value="{{ hasil.HA }}"
+              readonly
+            />
+            {% else %}
+            <input
+              type="number"
+              class="form-control"
+              name="horizontal_ambil"
+              min="0"
+              required
+            />
+            {% endif %}
+          </div>
+          <div class="mb-3 col-6">
+            <label for="horizontal_simpan" class="form-label"
+              >Horizontal Simpan:</label
+            >
+            {% if hasil %}
+            <input
+              type="number"
+              class="form-control"
+              name="horizontal_simpan"
+              min="0"
+              value="{{ hasil.HS }}"
+              readonly
+            />
+            {% else %}
+            <input
+              type="number"
+              class="form-control"
+              name="horizontal_simpan"
+              min="0"
+              required
+            />
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="mb-3 col-6">
+            <label for="vertikal_ambil" class="form-label"
+              >Vertikal Ambil:</label
+            >
+            {% if hasil %}
+            <input
+              type="number"
+              class="form-control"
+              name="vertikal_ambil"
+              min="0"
+              value="{{ hasil.VA }}"
+              readonly
+            />
+            {% else %}
+            <input
+              type="number"
+              class="form-control"
+              name="vertikal_ambil"
+              min="0"
+              required
+            />
+            {% endif %}
+          </div>
+          <div class="mb-3 col-6">
+            <label for="vertikal_simpan" class="form-label"
+              >Vertikal Simpan:</label
+            >
+            {% if hasil %}
+            <input
+              type="number"
+              class="form-control"
+              name="vertikal_simpan"
+              min="0"
+              value="{{ hasil.VS }}"
+              readonly
+            />
+            {% else %}
+            <input
+              type="number"
+              class="form-control"
+              name="vertikal_simpan"
+              min="0"
+              required
+            />
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="durasi_kerja" class="form-label">Jangkauan Kerja:</label>
+          {% if hasil %}
+          <input
+            type="text"
+            class="form-control"
+            name="durasi_kerja"
+            value="{{ hasil.Jangkauan }}"
+            readonly
+          />
+          {% else %}
+          <select class="form-select" name="durasi_kerja" required>
+            <option value="1">Kurang dari 1 jam</option>
+            <option value="2">1-2 jam</option>
+            <option value="3">2-8 jam</option>
+          </select>
+          {% endif %}
+        </div>
+
+        <div class="row">
+          <div class="mb-3 col-6">
+            <label for="sudut_putaran" class="form-label"
+              >Sudut Putaran Badan (0 - 135):</label
+            >
+            {% if hasil %}
+            <input
+              type="number"
+              class="form-control"
+              name="sudut_putaran"
+              min="0"
+              value="{{ hasil.Sudut_putaran }}"
+              readonly
+            />{% else %}
+            <input
+              type="number"
+              class="form-control"
+              name="sudut_putaran"
+              min="0"
+              required
+            />
+            {% endif %}
+          </div>
+          <div class="mb-3 col-6">
+            <label for="frekuensi" class="form-label"
+              >Frekuensi (angkatan per menit 0 - 15):</label
+            >
+            {% if hasil %}
+            <input
+              type="number"
+              class="form-control"
+              name="frekuensi"
+              min="0"
+              value="{{ hasil.Frekuensi }}"
+              readonly
+            />{% else %}
+            <input
+              type="number"
+              class="form-control"
+              name="frekuensi"
+              min="0"
+              required
+            />
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="pegangan" class="form-label">Pegangan:</label>
+          {% if hasil %}
+          <input
+            type="text"
+            class="form-control"
+            name="pegangan"
+            value="{{ hasil.Pegangan }}"
+            readonly
+          />
+          {% else %}
+          <select class="form-select" name="pegangan" required>
+            <option value="1">1 (Baik)</option>
+            <option value="2">2 (Sedang)</option>
+            <option value="3">3 (Buruk)</option>
+          </select>
+          {% endif %}
+        </div>
+
+        {% if hasil %}
+        <hr />
+        {% else %}
+        <div class="d-grid gap-2">
+          <input
+            type="submit"
+            class="btn btn-dark rounded-0"
+            value="Hitung Penilaian"
+          />
+        </div>
+        {% endif %}
+      </form>
+
+      <!-- Hasil Perhitungan Akan Ditampilkan Di Sini -->
+      <div id="hasil_perhitungan" class="mt-3">
+        {% if hasil %}
+        <div class="row">
+          <div class="col-6">
+            <h4><strong>Data Aktifitas Kerja</strong></h4>
+            <div class="row">
+              <div class="col-6"><strong>Parameter</strong></div>
+              <div class="col-6"><strong>Nilai</strong></div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Nilai HM Ambil</div>
+              <div class="col-6">{{ hasil.HM_ambil }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Nilai HM Simpan</div>
+              <div class="col-6">{{ hasil.HM_simpan }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Nilai VM Ambil</div>
+              <div class="col-6">{{ hasil.VM_ambil }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Nilai VM Simpan</div>
+              <div class="col-6">{{ hasil.VM_simpan }}</div>
+            </div>
+            <hr />
+          </div>
+          <div class="col-6">
+            <h4><strong>Data Perhitungan RWL dan LI (Nilai Risiko)</strong></h4>
+            {% if hasil.Beban > 23 %}
+            <p class="alert alert-warning alert-sm rounded-0">
+              Berat beban tidak sesuai
+            </p>
+            {% elif hasil.Beban <= 23 %}
+            <div class="row">
+              <div class="col-6"><strong>Parameter</strong></div>
+              <div class="col-6"><strong>Nilai</strong></div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Nilai RWL Ambil</div>
+              <div class="col-6">{{ hasil.RWL_ambil }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Nilai RWL Simpan</div>
+              <div class="col-6">{{ hasil.RWL_simpan }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Nilai LI Ambil</div>
+              <div class="col-6">{{ hasil.LI_ambil }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Nilai LI Simpan</div>
+              <div class="col-6">{{ hasil.LI_simpan }}</div>
+            </div>
+            <hr />
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <h4><strong>Data Individu</strong></h4>
+            <div class="row">
+              <div class="col-6"><strong>Parameter</strong></div>
+              <div class="col-6"><strong>Nilai</strong></div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Tinggi Badan</div>
+              <div class="col-6">{{ hasil.TZ1 }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Jangkauan Kerja</div>
+              <div class="col-6">{{ hasil.Jangkauan }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Ketinggian Optimal</div>
+              <div class="col-6">{{ hasil.HZ1 }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Skala</div>
+              <div class="col-6">{{ hasil.skala1 }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Kecepatan Z-Axis</div>
+              <div class="col-6">{{ hasil.VZ1 }}</div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-6">Panjang Tangan</div>
+              <div class="col-6">{{ hasil.pbtangan1 }}</div>
+            </div>
+            <hr />
+          </div>
+          <div class="col-6">
+            <h4><strong>Lihat Gambar</strong></h4>
+            <div class="d-grid gap-2">
+              <button
+                class="btn btn-outline-dark btn-sm rounded-0 mt-4"
+                onclick="tampilkanGambar('individu')"
+              >
+                Gambar Individu</button
+              ><br />
+              <button
+                class="btn btn-outline-dark btn-sm rounded-0"
+                onclick="tampilkanGambar('subtract')"
+              >
+                Gambar Subtract</button
+              ><br />
+              <button
+                class="btn btn-outline-dark btn-sm rounded-0"
+                onclick="tampilkanGambar('cvt')"
+              >
+                Gambar CVT</button
+              ><br />
+              <button
+                class="btn btn-outline-dark btn-sm rounded-0"
+                onclick="tampilkanGambar('gaussian')"
+              >
+                Gambar Gaussian</button
+              ><br />
+              <button
+                class="btn btn-outline-dark btn-sm rounded-0"
+                onclick="tampilkanGambar('canny')"
+              >
+                Gambar Canny</button
+              ><br />
+              <button
+                class="btn btn-outline-dark btn-sm rounded-0"
+                onclick="tampilkanGambar('dilate')"
+              >
+                Gambar Dilate</button
+              ><br />
+              <button
+                class="btn btn-outline-dark btn-sm rounded-0"
+                onclick="tampilkanGambar('erode')"
+              >
+                Gambar Erode</button
+              ><br />
+              <button
+                class="btn btn-outline-dark btn-sm rounded-0"
+                onclick="tampilkanGambar('result')"
+              >
+                Gambar Result
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- pop up image -->
+        <img
+          id="individu"
+          class="rounded-0 hidden"
+          src="{{ url_for('static', filename='data-image/' + hasil.individu) }}"
+          width="400px"
+          onclick="tampilkanPopup('individu')"
+        />
+        <img
+          id="subtract"
+          class="rounded-0 hidden"
+          src="{{ url_for('static', filename='subtract-image/' + hasil.showobj_subtract) }}"
+          width="400px"
+          onclick="tampilkanPopup('subtract')"
+        />
+        <img
+          id="cvt"
+          class="rounded-0 hidden"
+          src="{{ url_for('static', filename='cvt-image/' + hasil.showobj_cvt) }}"
+          width="400px"
+          onclick="tampilkanPopup('cvt')"
+        />
+        <img
+          id="gaussian"
+          class="rounded-0 hidden"
+          src="{{ url_for('static', filename='gaussian-image/' + hasil.showobj_gaussian) }}"
+          width="400px"
+          onclick="tampilkanPopup('gaussian')"
+        />
+        <img
+          id="canny"
+          class="rounded-0 hidden"
+          src="{{ url_for('static', filename='canny-image/' + hasil.showobj_canny) }}"
+          width="400px"
+          onclick="tampilkanPopup('canny')"
+        />
+        <img
+          id="dilate"
+          class="rounded-0 hidden"
+          src="{{ url_for('static', filename='dilate-image/' + hasil.showobj_dilate) }}"
+          width="400px"
+          onclick="tampilkanPopup('dilate')"
+        />
+        <img
+          id="erode"
+          class="rounded-0 hidden"
+          src="{{ url_for('static', filename='erode-image/' + hasil.showobj_erode) }}"
+          width="400px"
+          onclick="tampilkanPopup('erode')"
+        />
+        <img
+          id="result"
+          class="rounded-0 hidden"
+          src="{{ url_for('static', filename='result-image/' + hasil.showobj_result) }}"
+          width="400px"
+          onclick="tampilkanPopup('result')"
+        />
+
+        <div id="gambarPopup">
+          <span class="tutupPopup" onclick="tutupPopup()">&times;</span>
+          <img id="gambarPopupImg" />
+        </div>
+
+        <div class="d-grid gap-2">
+          <a href="/" class="btn btn-dark rounded-0 mb-3 mt-3"
+            >Input Ulang Data</a
+          >
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      function tampilkanGambar(id) {
+        var gambar = document.getElementById(id);
+        var gambarPopup = document.getElementById("gambarPopupImg");
+        gambarPopup.src = gambar.src;
+        document.getElementById("gambarPopup").style.display = "block";
+      }
+
+      function tutupPopup() {
+        document.getElementById("gambarPopup").style.display = "none";
+      }
+    </script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+      integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
